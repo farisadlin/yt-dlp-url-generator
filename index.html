@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT-DLP URL Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .output-section {
+            margin-top: 30px;
+        }
+
+        .output-box {
+            background: #f7f7f7;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #333;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .output-box.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s, transform 0.1s;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        .copy-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .copy-btn.copied {
+            background: #4caf50;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #1565c0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YT-DLP URL Generator</h1>
+        <p class="subtitle">Generate yt-dlp commands for downloading YouTube videos</p>
+
+        <div class="form-group">
+            <label for="quality-select">Select Quality/Format:</label>
+            <select id="quality-select">
+                <option value="360p">360p (MP4)</option>
+                <option value="720p">720p (MP4)</option>
+                <option value="1080p" selected>1080p (MP4)</option>
+                <option value="audio-m4a">Audio Only (M4A)</option>
+                <option value="audio-mp3">Audio Only (MP3)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="url-input">YouTube URL:</label>
+            <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+
+        <div class="output-section">
+            <label>Generated Command:</label>
+            <div id="output" class="output-box empty">Your yt-dlp command will appear here...</div>
+            <button id="copy-btn" class="copy-btn" disabled>Copy Command</button>
+        </div>
+
+        <div class="info-box">
+            <strong>How to use:</strong> Select a quality option, paste your YouTube URL, and the yt-dlp command will be generated automatically. Click "Copy Command" to copy it to your clipboard.
+        </div>
+    </div>
+
+    <script>
+        const qualitySelect = document.getElementById('quality-select');
+        const urlInput = document.getElementById('url-input');
+        const output = document.getElementById('output');
+        const copyBtn = document.getElementById('copy-btn');
+
+        const commands = {
+            '360p': 'yt-dlp -f "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360][ext=mp4]" --merge-output-format mp4',
+            '720p': 'yt-dlp -f "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]" --merge-output-format mp4',
+            '1080p': 'yt-dlp -f "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]" --merge-output-format mp4',
+            'audio-m4a': 'yt-dlp -f "bestaudio[ext=m4a]/bestaudio" --extract-audio',
+            'audio-mp3': 'yt-dlp -f "bestaudio" --extract-audio --audio-format mp3'
+        };
+
+        function generateCommand() {
+            const quality = qualitySelect.value;
+            const url = urlInput.value.trim();
+
+            if (!quality || !url) {
+                output.textContent = 'Your yt-dlp command will appear here...';
+                output.classList.add('empty');
+                copyBtn.disabled = true;
+                return;
+            }
+
+            const command = `${commands[quality]} ${url}`;
+            output.textContent = command;
+            output.classList.remove('empty');
+            copyBtn.disabled = false;
+            copyBtn.textContent = 'Copy Command';
+            copyBtn.classList.remove('copied');
+        }
+
+        qualitySelect.addEventListener('change', generateCommand);
+        urlInput.addEventListener('input', generateCommand);
+
+        copyBtn.addEventListener('click', async () => {
+            const commandText = output.textContent;
+
+            try {
+                await navigator.clipboard.writeText(commandText);
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Command';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = commandText;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyBtn.textContent = 'Copied!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy Command';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                } catch (err) {
+                    alert('Failed to copy command');
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+    </script>
+</body>
+</html>
