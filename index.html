@@ -158,6 +158,11 @@
                 <option value="1080p" selected>1080p (MP4)</option>
                 <option value="audio-m4a">Audio Only (M4A)</option>
                 <option value="audio-mp3">Audio Only (MP3)</option>
+                <option value="subs-en-srt">Subtitles Only - English (SRT)</option>
+                <option value="subs-all-srt">Subtitles Only - All Languages (SRT)</option>
+                <option value="subs-en-vtt">Subtitles Only - English (VTT)</option>
+                <option value="auto-subs-en">Auto-Generated Subs - English (SRT)</option>
+                <option value="auto-subs-all">Auto-Generated Subs - All Languages (SRT)</option>
             </select>
         </div>
 
@@ -188,7 +193,12 @@
             '720p': 'yt-dlp -f "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]" --merge-output-format mp4',
             '1080p': 'yt-dlp -f "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]" --merge-output-format mp4',
             'audio-m4a': 'yt-dlp -f "bestaudio[ext=m4a]/bestaudio" --extract-audio',
-            'audio-mp3': 'yt-dlp -f "bestaudio" --extract-audio --audio-format mp3'
+            'audio-mp3': 'yt-dlp -f "bestaudio" --extract-audio --audio-format mp3',
+            'subs-en-srt': 'yt-dlp --write-subs --sub-langs en --sub-format srt --skip-download',
+            'subs-all-srt': 'yt-dlp --write-subs --all-subs --sub-format srt --skip-download',
+            'subs-en-vtt': 'yt-dlp --write-subs --sub-langs en --sub-format vtt --skip-download',
+            'auto-subs-en': 'yt-dlp --write-auto-subs --sub-langs en --sub-format srt --skip-download',
+            'auto-subs-all': 'yt-dlp --write-auto-subs --all-subs --sub-format srt --skip-download'
         };
 
         function generateCommand() {
